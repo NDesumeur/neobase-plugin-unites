@@ -1,73 +1,70 @@
-// Convertisseur d'unités, plugin NeoBase autonome (permission « network » pour les taux de change).
-const UC = {
-  'Longueur': {u: {'nanomètre (nm)': 1e-9, 'micromètre (µm)': 1e-6, 'millimètre (mm)': 1e-3, 'centimètre (cm)': .01, 'décimètre (dm)': .1, 'mètre (m)': 1, 'kilomètre (km)': 1000, 'pouce (in)': .0254, 'pied (ft)': .3048, 'yard (yd)': .9144, 'mile (mi)': 1609.344, 'mille marin (nmi)': 1852, 'année-lumière': 9.4607304725808e15, 'unité astronomique (ua)': 149597870700, 'parsec (pc)': 3.0856775814914e16}},
-  'Masse': {u: {'milligramme (mg)': 1e-6, 'gramme (g)': 1e-3, 'kilogramme (kg)': 1, 'tonne (t)': 1000, 'once (oz)': .028349523125, 'livre (lb)': .45359237, 'stone (st)': 6.35029318, 'carat (ct)': 2e-4, 'microgramme (µg)': 1e-9, 'quintal (q)': 100}},
-  'Volume': {u: {'millilitre (mL)': 1e-3, 'centilitre (cL)': .01, 'décilitre (dL)': .1, 'litre (L)': 1, 'mètre cube (m³)': 1000, 'centimètre cube (cm³)': 1e-3, 'cuillère à café': .005, 'cuillère à soupe': .015, 'tasse (US)': .2365882365, 'gallon (US)': 3.785411784, 'gallon (UK)': 4.54609, 'pinte (US)': .473176473, 'once liquide (US)': .0295735295625, 'baril de pétrole': 158.987294928}},
-  'Surface': {u: {'millimètre carré (mm²)': 1e-6, 'centimètre carré (cm²)': 1e-4, 'mètre carré (m²)': 1, 'are (a)': 100, 'hectare (ha)': 1e4, 'kilomètre carré (km²)': 1e6, 'pied carré (ft²)': .09290304, 'acre': 4046.8564224, 'mile carré (mi²)': 2589988.110336}},
-  'Temps': {u: {'milliseconde (ms)': 1e-3, 'seconde (s)': 1, 'minute (min)': 60, 'heure (h)': 3600, 'jour': 86400, 'semaine': 604800, 'mois (moyen)': 2629746, 'année (365 j)': 31536000, 'décennie': 315360000, 'siècle': 3153600000}},
-  'Vitesse': {u: {'mètre par seconde (m/s)': 1, 'kilomètre par heure (km/h)': 1 / 3.6, 'mile par heure (mph)': .44704, 'nœud (kn)': 1852 / 3600, 'pied par seconde (ft/s)': .3048, 'Mach': 340.29, 'vitesse de la lumière (c)': 299792458}},
-  'Température': {f: {'degré Celsius (°C)': [c => c, c => c], 'degré Fahrenheit (°F)': [f => (f - 32) * 5 / 9, c => c * 9 / 5 + 32], 'kelvin (K)': [k => k - 273.15, c => c + 273.15], 'degré Rankine (°R)': [r => (r - 491.67) * 5 / 9, c => (c + 273.15) * 9 / 5]}},
-  'Pression': {u: {'pascal (Pa)': 1, 'hectopascal (hPa)': 100, 'kilopascal (kPa)': 1000, 'bar': 1e5, 'millibar (mbar)': 100, 'atmosphère (atm)': 101325, 'mmHg': 133.322387415, 'psi': 6894.757293168}},
-  'Énergie': {u: {'joule (J)': 1, 'kilojoule (kJ)': 1000, 'calorie (cal)': 4.184, 'kilocalorie (kcal)': 4184, 'wattheure (Wh)': 3600, 'kilowattheure (kWh)': 3.6e6, 'électronvolt (eV)': 1.602176634e-19, 'BTU': 1055.05585262}},
-  'Puissance': {u: {'watt (W)': 1, 'kilowatt (kW)': 1000, 'mégawatt (MW)': 1e6, 'cheval-vapeur (ch)': 735.49875, 'horsepower (hp)': 745.69987158227}},
-  'Données': {u: {'bit': .125, 'octet (o)': 1, 'kilooctet (Ko)': 1e3, 'mégaoctet (Mo)': 1e6, 'gigaoctet (Go)': 1e9, 'téraoctet (To)': 1e12, 'kibioctet (Kio)': 1024, 'mébioctet (Mio)': 1048576, 'gibioctet (Gio)': 1073741824}},
-  'Angle': {u: {'degré (°)': 1, 'radian (rad)': 180 / Math.PI, 'grade (gon)': .9, 'minute d\'arc (′)': 1 / 60, 'tour': 360}},
-  'Consommation': {f: {'litres aux 100 km (L/100 km)': [v => v, v => v], 'kilomètres par litre (km/L)': [v => 100 / v, v => 100 / v], 'miles par gallon US (mpg)': [v => 235.214583 / v, v => 235.214583 / v]}},
-  'Monnaies': {money: true},
-};
-const UC_NAMES = {EUR: 'Euro', USD: 'Dollar américain', GBP: 'Livre sterling', CHF: 'Franc suisse', JPY: 'Yen', CAD: 'Dollar canadien', AUD: 'Dollar australien', CNY: 'Yuan', KRW: 'Won', INR: 'Roupie indienne', BRL: 'Réal', MXN: 'Peso mexicain', SEK: 'Couronne suédoise', NOK: 'Couronne norvégienne', DKK: 'Couronne danoise', PLN: 'Zloty', CZK: 'Couronne tchèque', TRY: 'Livre turque', ZAR: 'Rand', HKD: 'Dollar de Hong Kong', SGD: 'Dollar de Singapour', NZD: 'Dollar néo-zélandais', THB: 'Baht'};
-
+// Unités : ton appli d'origine, reprise telle quelle (HTML et code inchangés), livrée en plugin.
+// Elle demande l'accès complet : elle utilise les outils de NeoBase comme avant. NeoBase ne l'ouvre que si elle est signée.
+const HTML = "<div class=\"appWrap\">\n      <div class=\"agHead\"><span class=\"label\">Convertisseur d'unités</span></div>\n      <div id=\"ucCats\" class=\"setBg\"></div>\n      <div class=\"sysCard px\"><div class=\"ucLine\"><input class=\"f\" id=\"ucVal\" value=\"1\" inputmode=\"decimal\" spellcheck=\"false\"><select class=\"f\" id=\"ucFrom\"></select><button class=\"btn px\" id=\"ucSwap\" title=\"Inverser\">⇄</button><select class=\"f\" id=\"ucTo\"></select></div>\n        <div id=\"ucResult\" class=\"sysBig\"></div><div class=\"hint\" id=\"ucNote\"></div></div>\n      <div class=\"sysCard px\"><span class=\"label\">Dans toutes les unités · clic : choisir</span><div id=\"ucAll\"></div></div>\n    </div>";
 export default function (ctx) {
-  const el = ctx.el;
-  let cat = 'Longueur', rates = null, ratesAt = '', ratesErr = '';
-  const money = s => parseFloat(String(s).replace(',', '.'));
-  const units = c => c === 'Monnaies' ? Object.keys(rates || {EUR: 1}) : Object.keys(UC[c].u || UC[c].f);
-  function convert(c, v, a, b) { const x = UC[c]; if (x.money) return v / rates[a] * rates[b]; if (x.f) return x.f[b][1](x.f[a][0](v)); return v * x.u[a] / x.u[b]; }
-  const fmt = v => !isFinite(v) ? '—' : Math.abs(v) >= 1e12 || (Math.abs(v) < 1e-6 && v) ? v.toExponential(6).replace('.', ',') : (+v.toPrecision(10)).toLocaleString('fr-FR', {maximumFractionDigits: 10});
-
-  const S = el('style');
-  S.textContent = `
-    .uc{padding:18px;display:flex;flex-direction:column;gap:14px}
-    .uc .cats{display:flex;flex-wrap:wrap;gap:6px}
-    .uc .cats button{font:11px var(--title,monospace);color:var(--lilac,#d9c6ff);border:0;padding:7px 11px;cursor:pointer;background:color-mix(in srgb,var(--line2,#3a2a6e) 70%,transparent)}
-    .uc .cats button.on{background:color-mix(in srgb,var(--magenta,#e01ec8) 80%,#000);color:#fff}
-    .uc .card{background:color-mix(in srgb,var(--line,#2a1d52) 35%,var(--bg0,#0b031c));padding:14px;box-shadow:inset 0 0 0 2px var(--line2,#3a2a6e)}
-    .uc .line{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    .uc input,.uc select{font:16px var(--text,sans-serif);padding:8px 10px;background:color-mix(in srgb,var(--bg0,#0b031c) 70%,#000);color:var(--shell,#fff);border:2px solid var(--line2,#3a2a6e);outline:0}
-    .uc input{width:120px} .uc select{flex:1;min-width:120px}
-    .uc button.swap{cursor:pointer}
-    .uc .big{font:30px var(--title,monospace);color:#fff;margin-top:10px;word-break:break-all}
-    .uc .hint{color:var(--muted,#8f7bb8);font-size:13px;margin-top:4px}
-    .uc .all .row{display:flex;justify-content:space-between;gap:10px;padding:6px 8px;cursor:pointer;border-bottom:1px solid var(--line,#2a1d52)}
-    .uc .all .row:hover{background:rgba(var(--pkr,255,90,217),.12)} .uc .all b{color:var(--lilac,#d9c6ff)}
-    .uc .label{font:10px var(--title,monospace);color:var(--muted,#8f7bb8)}`;
-  const cats = el('div', 'cats'), val = el('input'); val.value = '1'; val.inputMode = 'decimal';
-  const from = el('select'), to = el('select'), swap = el('button', 'swap', '⇄');
-  const line = el('div', 'line'); line.append(val, from, swap, to);
-  const big = el('div', 'big'), note = el('div', 'hint');
-  const card1 = el('div', 'card'); card1.append(line, big, note);
-  const all = el('div', 'all'); const card2 = el('div', 'card'); card2.append(el('div', 'label', 'DANS TOUTES LES UNITÉS'), all);
-  const wrap = el('div', 'uc'); wrap.append(cats, card1, card2);
-  ctx.view.append(S, wrap);
-
-  function render() {
-    cats.replaceChildren(...Object.keys(UC).map(c => { const b = el('button', c === cat ? 'on' : '', c); b.onclick = () => { cat = c; from.dataset.cat = ''; render(); }; return b; }));
-    const us = units(cat), label = u => cat === 'Monnaies' ? u + ' · ' + (UC_NAMES[u] || u) : u;
-    if (from.dataset.cat !== cat) {
-      for (const s of [from, to]) s.replaceChildren(...us.map(u => { const o = el('option', '', label(u)); o.value = u; return o; }));
-      from.value = us[cat === 'Monnaies' ? 0 : Math.min(us.length - 1, cat === 'Longueur' ? 6 : 1)]; to.value = us[cat === 'Monnaies' ? 1 : Math.min(us.length - 1, cat === 'Longueur' ? 5 : 0)] || us[0];
-      from.dataset.cat = cat;
-    }
-    const v = money(val.value || '1'), a = from.value, b = to.value;
-    if (cat === 'Monnaies' && !rates) { big.textContent = 'Taux indisponibles' + (ratesErr ? ' : ' + ratesErr : ''); all.replaceChildren(); return; }
-    big.textContent = isNaN(v) ? '—' : fmt(convert(cat, v, a, b)) + ' ' + b.replace(/^.*\((.*)\)$/, '$1');
-    note.textContent = cat === 'Monnaies' ? 'Taux BCE du ' + ratesAt : '';
-    all.replaceChildren(...(isNaN(v) ? [] : us.filter(u => u !== a).map(u => { const r = el('div', 'row'); r.append(el('span', '', label(u)), el('b', '', fmt(convert(cat, v, a, u)))); r.onclick = () => { to.value = u; render(); }; return r; })));
+  const view = ctx.view;
+  if (typeof el === 'undefined' || typeof neo === 'undefined') { view.textContent = "Ce plugin doit être approuvé par NeoBase pour s'ouvrir."; return; }
+  view.innerHTML = HTML;
+  const $ = id => view.querySelector('#' + id);  // les identifiants de ta vue, sans toucher à ceux du reste de NeoBase
+  // ---- ton code d'origine ----
+  /* ---------- Convertisseur d'unités app: every unit as a factor of its category's base unit (temperatures and fuel use need formulas) ---------- */
+  const UC = {
+    'Longueur': {base: 'm', u: {'nanomètre (nm)': 1e-9, 'micromètre (µm)': 1e-6, 'millimètre (mm)': 1e-3, 'centimètre (cm)': .01, 'décimètre (dm)': .1, 'mètre (m)': 1, 'kilomètre (km)': 1000, 'pouce (in)': .0254, 'pied (ft)': .3048, 'yard (yd)': .9144, 'mile (mi)': 1609.344, 'mille marin (nmi)': 1852, 'année-lumière': 9.4607304725808e15, 'unité astronomique (ua)': 149597870700, 'parsec (pc)': 3.0856775814914e16}},
+    'Masse': {u: {'milligramme (mg)': 1e-6, 'gramme (g)': 1e-3, 'kilogramme (kg)': 1, 'tonne (t)': 1000, 'once (oz)': .028349523125, 'livre (lb)': .45359237, 'stone (st)': 6.35029318, 'carat (ct)': 2e-4, 'microgramme (µg)': 1e-9, 'quintal (q)': 100}},
+    'Volume': {u: {'millilitre (mL)': 1e-3, 'centilitre (cL)': .01, 'décilitre (dL)': .1, 'litre (L)': 1, 'mètre cube (m³)': 1000, 'centimètre cube (cm³)': 1e-3, 'cuillère à café': .005, 'cuillère à soupe': .015, 'tasse (US)': .2365882365, 'gallon (US)': 3.785411784, 'gallon (UK)': 4.54609, 'pinte (US)': .473176473, 'pinte (UK)': .56826125, 'once liquide (US)': .0295735295625, 'baril de pétrole': 158.987294928}},
+    'Surface': {u: {'millimètre carré (mm²)': 1e-6, 'centimètre carré (cm²)': 1e-4, 'mètre carré (m²)': 1, 'are (a)': 100, 'hectare (ha)': 1e4, 'kilomètre carré (km²)': 1e6, 'pouce carré (in²)': .00064516, 'pied carré (ft²)': .09290304, 'acre': 4046.8564224, 'mile carré (mi²)': 2589988.110336}},
+    'Temps': {u: {'nanoseconde (ns)': 1e-9, 'microseconde (µs)': 1e-6, 'milliseconde (ms)': 1e-3, 'seconde (s)': 1, 'minute (min)': 60, 'heure (h)': 3600, 'jour': 86400, 'semaine': 604800, 'mois (moyen)': 2629746, 'année (365 j)': 31536000, 'décennie': 315360000, 'siècle': 3153600000}},
+    'Vitesse': {u: {'mètre par seconde (m/s)': 1, 'kilomètre par heure (km/h)': 1 / 3.6, 'mile par heure (mph)': .44704, 'nœud (kn)': 1852 / 3600, 'pied par seconde (ft/s)': .3048, 'Mach (au niveau de la mer)': 340.29, 'vitesse de la lumière (c)': 299792458}},
+    'Température': {f: {'degré Celsius (°C)': [c => c, c => c], 'degré Fahrenheit (°F)': [f => (f - 32) * 5 / 9, c => c * 9 / 5 + 32], 'kelvin (K)': [k => k - 273.15, c => c + 273.15], 'degré Rankine (°R)': [r => (r - 491.67) * 5 / 9, c => (c + 273.15) * 9 / 5]}},
+    'Pression': {u: {'pascal (Pa)': 1, 'hectopascal (hPa)': 100, 'kilopascal (kPa)': 1000, 'mégapascal (MPa)': 1e6, 'bar': 1e5, 'millibar (mbar)': 100, 'atmosphère (atm)': 101325, 'millimètre de mercure (mmHg)': 133.322387415, 'psi': 6894.757293168, 'torr': 101325 / 760}},
+    'Énergie': {u: {'joule (J)': 1, 'kilojoule (kJ)': 1000, 'mégajoule (MJ)': 1e6, 'calorie (cal)': 4.184, 'kilocalorie (kcal)': 4184, 'wattheure (Wh)': 3600, 'kilowattheure (kWh)': 3.6e6, 'électronvolt (eV)': 1.602176634e-19, 'BTU': 1055.05585262, 'pied-livre (ft·lbf)': 1.3558179483314}},
+    'Puissance': {u: {'watt (W)': 1, 'kilowatt (kW)': 1000, 'mégawatt (MW)': 1e6, 'cheval-vapeur (ch)': 735.49875, 'horsepower (hp)': 745.69987158227, 'BTU par heure': .29307107017, 'calorie par seconde': 4.184}},
+    'Données': {u: {'bit': .125, 'octet (o)': 1, 'kilooctet (Ko, 1000)': 1e3, 'mégaoctet (Mo, 1000²)': 1e6, 'gigaoctet (Go, 1000³)': 1e9, 'téraoctet (To, 1000⁴)': 1e12, 'pétaoctet (Po)': 1e15, 'kibioctet (Kio, 1024)': 1024, 'mébioctet (Mio, 1024²)': 1048576, 'gibioctet (Gio, 1024³)': 1073741824, 'tébioctet (Tio, 1024⁴)': 1099511627776, 'kilobit (kb)': 125, 'mégabit (Mb)': 125000, 'gigabit (Gb)': 1.25e8}},
+    'Débit internet': {u: {'bit par seconde (bit/s)': 1, 'kilobit par seconde (kbit/s)': 1e3, 'mégabit par seconde (Mbit/s)': 1e6, 'gigabit par seconde (Gbit/s)': 1e9, 'kilooctet par seconde (Ko/s)': 8e3, 'mégaoctet par seconde (Mo/s)': 8e6, 'gigaoctet par seconde (Go/s)': 8e9}},
+    'Angle': {u: {'degré (°)': 1, 'radian (rad)': 180 / Math.PI, 'grade (gon)': .9, 'minute d\'arc (′)': 1 / 60, 'seconde d\'arc (″)': 1 / 3600, 'tour': 360, 'milliradian (mrad)': .18 / Math.PI}},
+    'Fréquence': {u: {'hertz (Hz)': 1, 'kilohertz (kHz)': 1e3, 'mégahertz (MHz)': 1e6, 'gigahertz (GHz)': 1e9, 'tour par minute (tr/min)': 1 / 60}},
+    'Force': {u: {'newton (N)': 1, 'kilonewton (kN)': 1000, 'dyne': 1e-5, 'kilogramme-force (kgf)': 9.80665, 'livre-force (lbf)': 4.4482216152605}},
+    'Consommation': {f: {'litres aux 100 km (L/100 km)': [v => v, v => v], 'kilomètres par litre (km/L)': [v => 100 / v, v => 100 / v], 'miles par gallon US (mpg)': [v => 235.214583 / v, v => 235.214583 / v], 'miles par gallon UK (mpg UK)': [v => 282.480936 / v, v => 282.480936 / v]}},
+    'Cuisine': {u: {'gramme de farine': 1 / 125, 'gramme de sucre': 1 / 200, 'gramme de beurre': 1 / 227, 'gramme de riz': 1 / 185, 'tasse (US)': 1, 'millilitre (mL)': 1 / 236.5882365, 'cuillère à soupe': 1 / 16, 'cuillère à café': 1 / 48}, note: "Les grammes dépendent de l'ingrédient : ce sont des équivalences courantes pour une tasse."},
+    'Pointure': {f: {'pointure EU': [v => v, v => v], 'pointure US homme': [v => v + 33, v => v - 33], 'pointure US femme': [v => v + 31, v => v - 31], 'pointure UK': [v => v + 34, v => v - 34], 'longueur du pied (cm)': [v => (v + 1.5) * 1.5, v => v / 1.5 - 1.5]}, note: 'Équivalences approximatives : elles varient selon les marques.'},
+    'Monnaies': {money: true},
+  };
+  let ucCat = 'Longueur', ucRates = null, ucRatesAt = '', ucRatesErr = '';
+  const ucUnits = cat => cat === 'Monnaies' ? Object.keys(ucRates || {EUR: 1}) : Object.keys(UC[cat].u || UC[cat].f);
+  // value in unit `a` -> unit `b`
+  function ucConvert(cat, v, a, b) {
+    const c = UC[cat];
+    if (c.money) return v / ucRates[a] * ucRates[b];
+    if (c.f) return c.f[b][1](c.f[a][0](v));
+    return v * c.u[a] / c.u[b];
   }
-  val.oninput = from.onchange = to.onchange = render;
-  swap.onclick = () => { const a = from.value; from.value = to.value; to.value = a; render(); };
-  ctx.onOpen(async () => {
-    if (!rates) try { const r = await ctx.net('https://api.frankfurter.dev/v1/latest?base=EUR'); const d = JSON.parse(r.body); rates = {EUR: 1, ...d.rates}; ratesAt = d.date; } catch (e) { ratesErr = e.message; }
-    render();
-  });
+  const ucFmt = v => !isFinite(v) ? '—' : Math.abs(v) >= 1e12 || (Math.abs(v) < 1e-6 && v) ? v.toExponential(6).replace('.', ',') : (+v.toPrecision(10)).toLocaleString('fr-FR', {maximumFractionDigits: 10});
+  console.assert(ucConvert('Longueur', 1, 'kilomètre (km)', 'mètre (m)') === 1000 && Math.round(ucConvert('Température', 100, 'degré Celsius (°C)', 'degré Fahrenheit (°F)')) === 212
+    && Math.abs(ucConvert('Consommation', 5, 'litres aux 100 km (L/100 km)', 'kilomètres par litre (km/L)') - 20) < 1e-9, 'ucConvert');
+  const UC_NAMES = {EUR: 'Euro', USD: 'Dollar américain', GBP: 'Livre sterling', CHF: 'Franc suisse', JPY: 'Yen', CAD: 'Dollar canadien', AUD: 'Dollar australien', CNY: 'Yuan', KRW: 'Won', INR: 'Roupie indienne', BRL: 'Réal', MXN: 'Peso mexicain', SEK: 'Couronne suédoise', NOK: 'Couronne norvégienne', DKK: 'Couronne danoise', PLN: 'Zloty', CZK: 'Couronne tchèque', HUF: 'Forint', RON: 'Leu', TRY: 'Livre turque', ZAR: 'Rand', HKD: 'Dollar de Hong Kong', SGD: 'Dollar de Singapour', NZD: 'Dollar néo-zélandais', THB: 'Baht', IDR: 'Roupie indonésienne', ILS: 'Shekel', ISK: 'Couronne islandaise', MYR: 'Ringgit', PHP: 'Peso philippin', BGN: 'Lev'};
+  async function ucOpen() {
+    if (!ucRates) try {  // European Central Bank rates through Frankfurter (free, no account), updated every working day
+      const d = await fetch('https://api.frankfurter.dev/v1/latest?base=EUR').then(r => r.json());
+      ucRates = {EUR: 1, ...d.rates}; ucRatesAt = d.date;
+    } catch (e) { ucRatesErr = e.message; }
+    ucRender();
+  }
+  function ucRender() {
+    $('ucCats').replaceChildren(...Object.keys(UC).map(c => { const b = el('button', 'tab px' + (c === ucCat ? ' on' : ''), c); b.onclick = () => { ucCat = c; $('ucFrom').dataset.cat = ''; ucRender(); }; return b; }));
+    const units = ucUnits(ucCat), label = u => ucCat === 'Monnaies' ? u + ' · ' + (UC_NAMES[u] || u) : u;
+    if ($('ucFrom').dataset.cat !== ucCat) {
+      for (const s of [$('ucFrom'), $('ucTo')]) s.replaceChildren(...units.map(u => new Option(label(u), u)));
+      $('ucFrom').value = units[ucCat === 'Monnaies' ? 0 : Math.min(units.length - 1, ucCat === 'Longueur' ? 6 : 1)]; $('ucTo').value = units[ucCat === 'Monnaies' ? 1 : Math.min(units.length - 1, ucCat === 'Longueur' ? 5 : 0)] || units[0];
+      $('ucFrom').dataset.cat = ucCat;
+    }
+    const v = money($('ucVal').value || '1'), a = $('ucFrom').value, b = $('ucTo').value;
+    if (ucCat === 'Monnaies' && !ucRates) { $('ucResult').textContent = 'Taux indisponibles' + (ucRatesErr ? ' : ' + ucRatesErr : ''); $('ucAll').replaceChildren(); return; }
+    $('ucResult').textContent = isNaN(v) ? '—' : ucFmt(ucConvert(ucCat, v, a, b)) + ' ' + b.replace(/^.*\((.*)\)$/, '$1');
+    $('ucNote').textContent = UC[ucCat].note || (ucCat === 'Monnaies' ? 'Taux de la Banque centrale européenne du ' + new Date(ucRatesAt + 'T12:00').toLocaleDateString('fr-FR') + '.' : '');
+    $('ucAll').replaceChildren(...(isNaN(v) ? [] : units.filter(u => u !== a).map(u => { const r = el('div', 'ucRow'); r.append(el('span', '', label(u)), el('b', '', ucFmt(ucConvert(ucCat, v, a, u)))); r.onclick = () => { $('ucTo').value = u; ucRender(); }; return r; })));
+  }
+  $('ucVal').oninput = $('ucFrom').onchange = $('ucTo').onchange = ucRender;
+  $('ucSwap').onclick = () => { const a = $('ucFrom').value; $('ucFrom').value = $('ucTo').value; $('ucTo').value = a; ucRender(); };
+  // ---- fin ----
+  ctx.onOpen(() => { ucOpen(); });
 }
