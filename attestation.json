@@ -1,0 +1,9 @@
+{
+  "pluginId": "neobase.unites",
+  "repo": "NDesumeur/neobase-plugin-unites",
+  "version": "1.0.0",
+  "sha256": "5f9dc9d907906f74ce37f3ca5b8987ef109e1433f8c0100a3d24f0a9b3ed7cf4",
+  "approvedAt": "2026-10-31T03:17:58.983Z",
+  "neobase": ">=4.0.0",
+  "signature": "ZrMDE19bWEhC3jRRn/sx4rx6s+tCCaTrVOzLt2FoNJxE0NKAa3o5jp4AuvqPAqUmGr/7T0eeF/U0o9MQ87VzBQ=="
+}
