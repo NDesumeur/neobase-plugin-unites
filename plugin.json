@@ -1,7 +1,7 @@
 {
   "id": "neobase.unites",
   "name": "Unités",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "author": "NDesumeur",
   "description": "Convertisseur d'unités : longueurs, masses, températures, monnaies et bien d'autres.",
   "icon": "icon.png",

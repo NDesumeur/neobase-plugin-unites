@@ -2,11 +2,22 @@
 // Ses données sont dans le dossier du plugin, que NeoBase sauvegarde (synchro cloud et sauvegardes) ; à la première ouverture elle reprend ce que tu avais dans NeoBase.
 // Elle demande l'accès complet pour utiliser les outils d'interface de NeoBase. NeoBase ne l'ouvre que si elle est signée.
 const HTML = "<div class=\"appWrap\">\n      <div class=\"agHead\"><span class=\"label\">Convertisseur d'unités</span></div>\n      <div id=\"ucCats\" class=\"setBg\"></div>\n      <div class=\"sysCard px\"><div class=\"ucLine\"><input class=\"f\" id=\"ucVal\" value=\"1\" inputmode=\"decimal\" spellcheck=\"false\"><select class=\"f\" id=\"ucFrom\"></select><button class=\"btn px\" id=\"ucSwap\" title=\"Inverser\">⇄</button><select class=\"f\" id=\"ucTo\"></select></div>\n        <div id=\"ucResult\" class=\"sysBig\"></div><div class=\"hint\" id=\"ucNote\"></div></div>\n      <div class=\"sysCard px\"><span class=\"label\">Dans toutes les unités · clic : choisir</span><div id=\"ucAll\"></div></div>\n    </div>";
+/*CSS-MOVED*/ const CSS = `.ucLine{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+#ucVal{width:180px;font-size:20px}
+#ucFrom,#ucTo{flex:1;min-width:220px}
+#ucSwap{height:46px;font-size:20px}
+#ucResult{font-size:24px;margin-top:6px;white-space:normal;word-break:break-word}
+#ucAll{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:2px 20px}
+.ucRow{display:flex;justify-content:space-between;gap:12px;padding:7px 4px;font-size:14px;color:var(--lilac);cursor:var(--cp,pointer);border-bottom:1px solid rgba(255,255,255,.05)}
+.ucRow:hover{background:rgba(255,255,255,.05)}
+.ucRow b{color:#fff;font-weight:600;text-align:right}
+`;  // le style de ce plugin (il utilise les variables du thème de NeoBase)
 export default async function (ctx) {
   const view = ctx.view;
   if (!ctx.host) { view.textContent = "Ce plugin doit être approuvé par NeoBase pour s'ouvrir."; return; }
   const { el, toast, sfx, ask, newTab, pixIcon, PIX, WX } = ctx.host;
   const folder = ctx.folder, legacy = ctx.legacy || {};
+  ctx.host.addStyle(CSS);
   view.innerHTML = HTML;
   const $ = id => id === "unitsApp" ? view : view.querySelector('#' + id);  // les identifiants de ta vue, sans toucher à ceux du reste de NeoBase
   const doc = async n => { try { return await folder.read(n); } catch { return null; } };
