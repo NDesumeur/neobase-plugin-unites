@@ -1,0 +1,16 @@
+{
+  "id": "neobase.unites",
+  "name": "Unités",
+  "version": "1.0.0",
+  "author": "NDesumeur",
+  "description": "Convertisseur d'unités : longueurs, masses, températures, monnaies et plus.",
+  "entry": "index.js",
+  "view": "unites",
+  "neobase": ">=4.0.0",
+  "type": "app",
+  "category": "Outils",
+  "mobile": true,
+  "system": false,
+  "dependencies": {},
+  "permissions": ["network"]
+}
