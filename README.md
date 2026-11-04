@@ -1,7 +1,8 @@
 # Unités
 
-Convertisseur d'unités pour NeoBase : longueurs, masses, volumes, surfaces, températures, vitesses,
-données, monnaies (taux du jour) et bien d'autres.
+Convertisseur d'unités : longueurs, masses, températures, monnaies et bien d'autres.
+
+Ses données sont rangées dans le dossier du plugin, que NeoBase sauvegarde (synchro cloud comprise). Au premier lancement, il reprend ce que tu avais déjà dans NeoBase.
 
 ## Installer
 
